@@ -1,7 +1,5 @@
 package com.cloud.Communication;
 
-
-import com.cloud.Controller;
 import com.cloud.WorkingWithMessage.GetMessage;
 
 import java.io.IOException;
@@ -14,15 +12,19 @@ public class MyClientServer {
     private static final String HOST_PORT_PROP = "server.port";
     private String hostAddress;
     private int hostPort;
-
     private GetMessage getMessage;
-
-    private Controller controller;
     private Network network;
 
-    public MyClientServer(Controller controller) {
-        this.controller = controller;
-        //есть какая то камуникация с контроллером
+    public Network getNetwork() {
+        return network;
+    }
+
+    public GetMessage getGetMessage() {
+        return getMessage;
+    }
+
+    public MyClientServer() {
+        getMessage = new GetMessage();
         initialise();
     }
 
@@ -45,24 +47,8 @@ public class MyClientServer {
 
     private void startConnectionToServer() {
         this.network = new Network(hostAddress, hostPort, this);
-        getMessage = new GetMessage(network,controller);
     }
 
-    public void sendInt(int intIn){
-        network.sendInt(intIn);
-    }
-
-    public void sendLong(long longIn){
-        network.sendLong(longIn);
-    }
-
-    public void sendByte(byte byteIn){
-        network.sendByte(byteIn);
-    }
-
-    public void sendMessage(byte[] outByte) {
-        network.sendMessage(outByte);
-    }
 
     public void processRetrievedMessage(byte innerByte) {
         getMessage.workingWithInnerMessage(innerByte);

@@ -3,6 +3,7 @@ package com.cloud;
 
 import com.cloud.Communication.MyClientServer;
 import com.cloud.Controllers.FileForTable;
+import com.cloud.WorkingWithMessage.GetMessage;
 import com.cloud.WorkingWithMessage.SendMessage;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -59,8 +60,9 @@ public class Controller implements Initializable {
         table_clientSize = new TableColumn<>();
         table_clientDate = new TableColumn<>();
         try{
-            this.messageService = new MyClientServer(this);
-            this.sendMessage = new SendMessage(this.messageService);
+            this.messageService = App.getMessageService();
+            this.sendMessage = new SendMessage(this.messageService.getNetwork());
+            App.getMessageService().getGetMessage().setController(this);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -75,7 +77,7 @@ public class Controller implements Initializable {
     //button clients
     @FXML
     public void button_sendToService(ActionEvent actionEvent) {
-        File file = new File("cloud-client/storage/1.txt");
+        File file = new File("cloud-client/storage/unnamed.jpg");
 
         try {
             sendMessage.sendFileToServer(file);
