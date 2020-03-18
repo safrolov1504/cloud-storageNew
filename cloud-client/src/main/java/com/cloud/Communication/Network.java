@@ -1,5 +1,6 @@
 package com.cloud.Communication;
 
+import com.cloud.Controller;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 
@@ -17,7 +18,7 @@ public class Network {
     private DataInputStream inputStream;
     private DataOutputStream outputStream;
     private Scanner scannerIn;
-
+    private Controller controller;
 
     public DataOutputStream getOutputStream() {
         return outputStream;
@@ -75,7 +76,6 @@ public class Network {
             e.printStackTrace();
         }
     }
-
     public void sendLong(long longIn){
         try {
             outputStream.writeLong(longIn);
@@ -83,7 +83,6 @@ public class Network {
             e.printStackTrace();
         }
     }
-
     public void sendByte(byte byteIn){
         try {
             outputStream.writeByte(byteIn);
@@ -91,7 +90,6 @@ public class Network {
             e.printStackTrace();
         }
     }
-
     public void sendMessage(byte[] outByte) {
         try {
             outputStream.write(outByte);

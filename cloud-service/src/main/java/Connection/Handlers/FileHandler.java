@@ -11,8 +11,6 @@ import java.io.IOException;
 
 // Идет после FirstHandler в конвеере
 public class FileHandler extends ChannelInboundHandlerAdapter {
-
-
     public enum State {
         IDLE, NEXT_HANDLER,NAME_LENGTH, NAME, FILE_LENGTH, FILE, GET
     }
@@ -21,27 +19,28 @@ public class FileHandler extends ChannelInboundHandlerAdapter {
     private String fileName;
     private long fileLength;
     private long receivedFileLength;
-    private String userName;
 
     private File file;
     private FileOutputStream fileOutputStream;
+    private String userName;
 
-//    public FileHandler(String userName) {
-//        this.userName = userName;
-//    }
+    public FileHandler(String userName) {
+        this.userName = userName;
+    }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         ByteBuf buf = (ByteBuf)msg;
-        System.out.println("here");
+
         while (buf.readableBytes()>0){
             if(state == State.IDLE){
                 byte read = buf.readByte();
-                if(read == CreatCommand.getGetFile()){
+                if(read == CreatCommand.getSendFile()){
                     state = State.NAME_LENGTH;
                 } else {
+                    System.out.println("ERROR: Invalid first byte - " + read);
                     //сделать переход в статус перекидования в следующий handler
-                    state = State.NEXT_HANDLER;
+                    //state = State.NEXT_HANDLER;
                 }
             }
 
@@ -70,7 +69,7 @@ public class FileHandler extends ChannelInboundHandlerAdapter {
 
                     //getting ready for taking the file
                     //creat folders if it needs
-                    file = new File("cloud-server/global-storage/"+userName);
+                    file = new File("/Users/safrolov/Documents/JavaProgramming/01_readyProjects/cloud-storageNew/cloud-service/global-storage/"+userName);
                     if(!file.exists()){
                         file.mkdirs();
                     }
@@ -78,29 +77,28 @@ public class FileHandler extends ChannelInboundHandlerAdapter {
                     //creat file
                     file = new File(file.getPath()+"/"+ fileName);
                     file.createNewFile();
+                    fileOutputStream = new FileOutputStream(file);
                     state = State.FILE;
                 }
             }
 
             if(state == State.FILE){
-                //addFile(ctx, buf);
-                System.out.println(userName+" "+ fileName +" "+ fileLength);
+                while (buf.readableBytes()>0){
+                    fileOutputStream.write(buf.readByte());
+                    receivedFileLength++;
+                    if(receivedFileLength == fileLength){
+                        state = State.IDLE;
+                        fileOutputStream.close();
+                        System.out.println(userName+" "+ fileName +" "+ fileLength);
+                        sendBack(ctx, CreatCommand.getSendFileOk());
+                        break;
+                    }
+                }
                 break;
             }
         }
     }
 
-    private void addFile(ChannelHandlerContext ctx, ByteBuf buf) throws IOException {
-        while (buf.readableBytes()>0){
-            fileOutputStream.write(buf.readByte());
-            receivedFileLength++;
-            if(receivedFileLength == fileLength){
-                state = State.IDLE;
-                sendBack(ctx, CreatCommand.getCommandAuthOk());
-                break;
-            }
-        }
-    }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
