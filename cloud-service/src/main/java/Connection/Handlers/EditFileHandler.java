@@ -3,11 +3,11 @@ package Connection.Handlers;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import workingWithMessage.AddFile;
+
 
 // Идет после FirstHandler в конвеере
 public class EditFileHandler extends ChannelInboundHandlerAdapter {
-    private AddFile addFile;
+//    private AddFile addFile;
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {

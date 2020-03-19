@@ -5,6 +5,9 @@ public class CreatCommand {
     private static byte commandAuthOk = commandAuth;
     private static byte commandAuthNok = -125;
 
+    private static byte sendListFileFromService = -124;
+    private static byte sendListFileFromServiceEnd = -123;
+
     private static byte getFile = -120;
     private static byte getFileOk = getFile;
     private static byte getFileNOk = -119;
@@ -65,5 +68,12 @@ public class CreatCommand {
     }
     public static byte getEditFileNOk() {
         return editFileNOk;
+    }
+    public static byte getSendListFileFromService() {
+        return sendListFileFromService;
+    }
+
+    public static byte getSendListFileFromServiceEnd() {
+        return sendListFileFromServiceEnd;
     }
 }

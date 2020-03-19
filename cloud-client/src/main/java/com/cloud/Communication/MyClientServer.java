@@ -1,9 +1,12 @@
 package com.cloud.Communication;
 
+import com.cloud.WorkingWithMessage.CreatCommand;
 import com.cloud.WorkingWithMessage.GetMessage;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Properties;
 
 public class MyClientServer {
@@ -52,5 +55,17 @@ public class MyClientServer {
 
     public void processRetrievedMessage(byte innerByte) {
         getMessage.workingWithInnerMessage(innerByte);
+    }
+
+    public void getListFile(ArrayList<Byte> bytes) {
+        bytes.remove(0);
+        bytes.remove(bytes.size()-1);
+        byte [] bytes1 = new byte[bytes.size()];
+        int i = 0;
+        for (byte b:bytes) {
+            bytes1[i] = b;
+            i++;
+        }
+        getMessage.getListFile(bytes1);
     }
 }

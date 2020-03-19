@@ -1,4 +1,4 @@
-package com.cloud.Controllers;
+package com.cloud;
 
 public class FileForTable {
     public String nameFileTable;
@@ -9,6 +9,16 @@ public class FileForTable {
         this.nameFileTable = nameFileTable;
         this.sizeFileTable = sizeFileTable;
         this.dateCreatFileTable = dateCreatFileTable;
+    }
+
+    public FileForTable() {
+    }
+
+    public FileForTable(String inString) {
+        String[] subStr = inString.split("\\s");
+        nameFileTable = subStr[0];
+        sizeFileTable = subStr[1];
+        dateCreatFileTable = subStr[2];
     }
 
     public String getNameFileTable() {
@@ -33,5 +43,10 @@ public class FileForTable {
 
     public void setDateCreatFileTable(String dateCreatFileTable) {
         this.dateCreatFileTable = dateCreatFileTable;
+    }
+
+    @Override
+    public String toString() {
+        return nameFileTable+" "+ sizeFileTable+ " "+ dateCreatFileTable+"<END>";
     }
 }

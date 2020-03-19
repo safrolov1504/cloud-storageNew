@@ -1,18 +1,22 @@
 package Connection.Handlers;
 
 import Connection.CreatCommand;
+import Connection.FileForTable;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import workingWithMessage.ListFilesServer;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.attribute.BasicFileAttributes;
 
 // Идет после FirstHandler в конвеере
 public class FileHandler extends ChannelInboundHandlerAdapter {
     public enum State {
-        IDLE, NEXT_HANDLER,NAME_LENGTH, NAME, FILE_LENGTH, FILE, GET
+        IDLE, SEND_LIST,NAME_LENGTH, NAME, FILE_LENGTH, FILE, GET
     }
     private State state = State.IDLE;
     private int fileNameLength;
@@ -37,6 +41,9 @@ public class FileHandler extends ChannelInboundHandlerAdapter {
                 byte read = buf.readByte();
                 if(read == CreatCommand.getSendFile()){
                     state = State.NAME_LENGTH;
+                } else if(read == CreatCommand.getSendListFileFromService()) {
+                    System.out.println("send list");
+                    sendList(ctx);
                 } else {
                     System.out.println("ERROR: Invalid first byte - " + read);
                     //сделать переход в статус перекидования в следующий handler
@@ -44,9 +51,9 @@ public class FileHandler extends ChannelInboundHandlerAdapter {
                 }
             }
 
-            if(state == State.NEXT_HANDLER){
-                //сделать переход в статус перекидования в следующий handler
-            }
+//            if(state == State.NEXT_HANDLER){
+//                //сделать переход в статус перекидования в следующий handler
+//            }
 
             if(state == State.NAME_LENGTH){
                 if(buf.readableBytes() >= 4){
@@ -99,11 +106,23 @@ public class FileHandler extends ChannelInboundHandlerAdapter {
         }
     }
 
+    private void sendList(ChannelHandlerContext ctx){
+        sendBack(ctx,CreatCommand.getSendListFileFromService());
+        sendBackBytes(ctx,ListFilesServer.creatFileList(userName));
+        sendBack(ctx,CreatCommand.getSendListFileFromServiceEnd());
+    }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         cause.printStackTrace();
         ctx.close();
+    }
+
+    public void sendBackBytes(ChannelHandlerContext ctx, byte [] arr){
+        ByteBuf buf = ctx.alloc().buffer(arr.length);
+        buf.writeBytes(arr);
+
+        ctx.writeAndFlush(buf);
     }
 
     public void sendBack(ChannelHandlerContext ctx, byte arr){

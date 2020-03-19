@@ -60,4 +60,8 @@ public class SendMessage {
 
         fileInputStream.close();
     }
+
+    public void sendRequestToGetListFileFromService() {
+        network.sendByte(CreatCommand.getSendListFileFromService());
+    }
 }

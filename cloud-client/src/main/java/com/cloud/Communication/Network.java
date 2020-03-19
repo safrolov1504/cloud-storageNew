@@ -1,6 +1,7 @@
 package com.cloud.Communication;
 
 import com.cloud.Controller;
+import com.cloud.WorkingWithMessage.CreatCommand;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 
@@ -8,6 +9,8 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class Network {
@@ -22,6 +25,9 @@ public class Network {
 
     public DataOutputStream getOutputStream() {
         return outputStream;
+    }
+    public DataInputStream getInputStream() {
+        return inputStream;
     }
 
     public Network(String serverAddress, int port, MyClientServer myClientServer) {
@@ -60,8 +66,20 @@ public class Network {
                 //waiting for message
                 try {
                     byte inByte = inputStream.readByte();
-                    System.out.println(inByte);
-                    Platform.runLater(() -> myClientServer.processRetrievedMessage(inByte));
+                    if(inByte == CreatCommand.getSendListFileFromService()){
+                        //get list of files on service
+                        ArrayList<Byte> bytes = new ArrayList<>();
+                        while (inByte != CreatCommand.getSendListFileFromServiceEnd()){
+                            inByte = inputStream.readByte();
+                            bytes.add(inByte);
+                            //System.out.println("here "+ inByte);
+                        }
+                        myClientServer.getListFile(bytes);
+                    } else {
+                        System.out.println(inByte);
+                        byte finalInByte = inByte;
+                        Platform.runLater(() -> myClientServer.processRetrievedMessage(finalInByte));
+                    }
                 } catch (IOException e){
                     System.exit(0);
                 }
