@@ -9,6 +9,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
@@ -68,11 +69,27 @@ public class Network {
                     byte inByte = inputStream.readByte();
                     if(inByte == CreatCommand.getSendListFileFromService()){
                         //get list of files on service
+                        System.out.println("Start updating list");
                         ArrayList<Byte> bytes = new ArrayList<>();
-                        while (inByte != CreatCommand.getSendListFileFromServiceEnd()){
+                        int time=0;
+
+                        //waiting for size of string
+                        byte [] byteLength = new byte[4];
+                        while (time !=4){
+                            inByte = inputStream.readByte();
+                            byteLength[time] = inByte;
+                            time++;
+                        }
+
+                        time = ByteBuffer.wrap(byteLength).getInt();
+                        //bytes.remove(0);
+                        System.out.println(Arrays.toString(bytes.toArray())+" "+time);
+
+                        while (time > 0){
                             inByte = inputStream.readByte();
                             bytes.add(inByte);
                             //System.out.println("here "+ inByte);
+                            time--;
                         }
                         myClientServer.getListFile(bytes);
                     } else {

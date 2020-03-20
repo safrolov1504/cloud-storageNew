@@ -41,7 +41,6 @@ public class SendMessage {
         network.sendLong(lengthFile);
 
         //начинаем работу с файлом
-
         boolean flag=true;
 
         while (flag){
@@ -54,14 +53,15 @@ public class SendMessage {
                 i = fileInputStream.read(byteArray);
                 lengthFile-=i;
                 network.sendMessage(byteArray);
-                System.out.println(i+" "+lengthFile);
-                System.out.println(Arrays.toString(byteArray));
+                //System.out.println(i+" "+lengthFile);
+                //System.out.println(Arrays.toString(byteArray));
         }
 
         fileInputStream.close();
     }
 
     public void sendRequestToGetListFileFromService() {
+        System.out.println("Send command to update list "+CreatCommand.getSendListFileFromService());
         network.sendByte(CreatCommand.getSendListFileFromService());
     }
 }

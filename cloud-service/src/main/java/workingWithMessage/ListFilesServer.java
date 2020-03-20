@@ -5,6 +5,7 @@ import Connection.FileForTable;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Arrays;
@@ -26,8 +27,25 @@ public class ListFilesServer {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.out.println(sb.toString());
-        System.out.println(Arrays.toString(sb.toString().getBytes()));
-        return sb.toString().getBytes();
+        String string = sb.toString();
+        int length = string.length();
+
+        byte [] byteLength = intToByteArray(length);
+        byte [] byteOut = Arrays.copyOf(byteLength,byteLength.length+string.length());
+
+        System.arraycopy(string.getBytes(),0,byteOut,byteLength.length,string.getBytes().length);
+        System.out.println(length+" "+string);
+        System.out.println(Arrays.toString(byteOut));
+        //System.out.println(Arrays.toString(byteLength)+" " +ByteBuffer.wrap(byteLength).getInt());
+        return byteOut;
+        //return sb.toString().getBytes();
+    }
+
+    public static final byte[] intToByteArray(int value) {
+        return new byte[] {
+                (byte)(value >>> 24),
+                (byte)(value >>> 16),
+                (byte)(value >>> 8),
+                (byte)value};
     }
 }

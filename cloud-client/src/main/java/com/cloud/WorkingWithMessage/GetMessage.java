@@ -9,8 +9,6 @@ import com.cloud.WorkingWithMessage.Message.WorkFile;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.Arrays;
 
 public class GetMessage {
@@ -30,13 +28,13 @@ public class GetMessage {
         String str = new String(bytesIn);
         System.out.println(str);
 
+        fileDataService.clear();
+
         String [] subString = str.split("<END>");
         for (String strFile:subString) {
-            //System.out.println(strFile);
-            //System.out.println(new FileForTable(strFile));
             fileDataService.add(new FileForTable(strFile));
         }
-        controller.setFileDataService(fileDataService);
+        controller.getWorkWithTables().addInfoTableService(fileDataService);
     }
 
     public void workingWithInnerMessage(byte innerByte) {

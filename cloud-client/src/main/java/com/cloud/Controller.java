@@ -2,21 +2,17 @@ package com.cloud;
 
 
 import com.cloud.Communication.MyClientServer;
+import com.cloud.Controllers.WorkWithTables;
 import com.cloud.WorkingWithMessage.SendMessage;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ResourceBundle;
 
 public class Controller implements Initializable {
@@ -32,24 +28,26 @@ public class Controller implements Initializable {
     public TableColumn<FileForTable,String> table_clientName;
     public TableColumn<FileForTable,String> table_clientSize;
     public TableColumn<FileForTable,String> table_clientDate;
-    public ObservableList<FileForTable> fileDataClient = FXCollections.observableArrayList();
+//    public ObservableList<FileForTable> fileDataClient = FXCollections.observableArrayList();
+
 
     //server
     public TableView<FileForTable> table_service;
     public TableColumn<FileForTable,String> table_serverName;
     public TableColumn<FileForTable,String> table_serverSize;
     public TableColumn<FileForTable,String> table_serverDate;
-    public ObservableList<FileForTable> fileDataService = FXCollections.observableArrayList();
+//    public ObservableList<FileForTable> fileDataService = FXCollections.observableArrayList();
 
     private MyClientServer messageService;
     private SendMessage sendMessage;
+    private WorkWithTables workWithTables;
 
     public void shutdown() {
         //System.exit(0);
     }
 
-    public void setFileDataService(ObservableList<FileForTable> fileDataService) {
-        this.fileDataService = fileDataService;
+    public WorkWithTables getWorkWithTables() {
+        return workWithTables;
     }
 
     @Override
@@ -63,39 +61,12 @@ public class Controller implements Initializable {
         }
 
         if(App.isFlag()){
-            sendMessage.sendRequestToGetListFileFromService();
-            creatTable();
+            //creatTables();
+            workWithTables = new WorkWithTables(this,sendMessage);
+            workWithTables.updateTableClient();
+
+            workWithTables.updateTableService();
         }
-    }
-
-    private void creatTable() {
-        this.table_clientName.setCellValueFactory(new PropertyValueFactory<FileForTable,String>("nameFileTable"));
-        this.table_clientSize.setCellValueFactory(new PropertyValueFactory<FileForTable,String>("sizeFileTable"));
-        this.table_clientDate.setCellValueFactory(new PropertyValueFactory<FileForTable,String>("dateCreatFileTable"));
-
-        this.table_serverName.setCellValueFactory(new PropertyValueFactory<FileForTable,String>("nameFileTable"));
-        this.table_serverSize.setCellValueFactory(new PropertyValueFactory<FileForTable,String>("sizeFileTable"));
-        this.table_serverDate.setCellValueFactory(new PropertyValueFactory<FileForTable,String>("dateCreatFileTable"));
-
-        //write files from local folder
-        File folder = new File("/Users/safrolov/Documents/JavaProgramming/01_readyProjects/cloud-storageNew/cloud-client/storage");
-        File[] arrayFile = folder.listFiles();
-        BasicFileAttributes attr;
-
-        FileForTable fileForTable;
-        try {
-            for (File f:arrayFile) {
-                attr = Files.readAttributes(f.toPath(), BasicFileAttributes.class);
-                fileForTable = new FileForTable(f.getName(),attr.size()+"",attr.creationTime().toString());
-                System.out.println(f.getName()+" "+attr.size()+" "+attr.creationTime());
-                this.fileDataClient.add(fileForTable);
-            }
-
-            this.table_client.setItems(this.fileDataClient);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        this.table_service.setItems(this.fileDataService);
     }
 
     //button login
@@ -107,20 +78,36 @@ public class Controller implements Initializable {
     //button clients
     @FXML
     public void button_sendToService(ActionEvent actionEvent) {
-        File file = new File("cloud-client/storage/unnamed.jpg");
+        File file;
 
-        try {
-            sendMessage.sendFileToServer(file);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+        FileForTable selectedFile = table_client.getSelectionModel().getSelectedItem();
+        System.out.println(selectedFile);
+        if(selectedFile !=null){
+            file = new File("cloud-client/storage/"+selectedFile.nameFileTable);
+            try {
+                sendMessage.sendFileToServer(file);
+                workWithTables.updateTableService();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            selectedFile=null;
         }
     }
 
     @FXML
     public void button_delete(ActionEvent actionEvent) {
+        File file;
 
+        FileForTable selectedFile = table_client.getSelectionModel().getSelectedItem();
+        System.out.println(selectedFile);
+        if(selectedFile !=null) {
+            file = new File("cloud-client/storage/" + selectedFile.nameFileTable);
+            file.delete();
+            selectedFile = null;
+        }
+        workWithTables.updateTableClient();
     }
 
     @FXML
@@ -134,5 +121,6 @@ public class Controller implements Initializable {
 
     @FXML
     public void button_exit(ActionEvent actionEvent) {
+        System.exit(0);
     }
 }

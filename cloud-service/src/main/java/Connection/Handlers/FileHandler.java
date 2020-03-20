@@ -16,7 +16,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 // Идет после FirstHandler в конвеере
 public class FileHandler extends ChannelInboundHandlerAdapter {
     public enum State {
-        IDLE, SEND_LIST,NAME_LENGTH, NAME, FILE_LENGTH, FILE, GET
+        IDLE,NAME_LENGTH, NAME, FILE_LENGTH, FILE, GET
     }
     private State state = State.IDLE;
     private int fileNameLength;
@@ -42,15 +42,15 @@ public class FileHandler extends ChannelInboundHandlerAdapter {
                 if(read == CreatCommand.getSendFile()){
                     state = State.NAME_LENGTH;
                 } else if(read == CreatCommand.getSendListFileFromService()) {
-                    System.out.println("send list");
+                    //System.out.println("get command to send list "+ CreatCommand.getSendListFileFromService());
                     sendList(ctx);
+                    //break;
                 } else {
                     System.out.println("ERROR: Invalid first byte - " + read);
                     //сделать переход в статус перекидования в следующий handler
                     //state = State.NEXT_HANDLER;
                 }
             }
-
 //            if(state == State.NEXT_HANDLER){
 //                //сделать переход в статус перекидования в следующий handler
 //            }
@@ -101,7 +101,7 @@ public class FileHandler extends ChannelInboundHandlerAdapter {
                         break;
                     }
                 }
-                break;
+                //break;
             }
         }
     }
@@ -109,7 +109,7 @@ public class FileHandler extends ChannelInboundHandlerAdapter {
     private void sendList(ChannelHandlerContext ctx){
         sendBack(ctx,CreatCommand.getSendListFileFromService());
         sendBackBytes(ctx,ListFilesServer.creatFileList(userName));
-        sendBack(ctx,CreatCommand.getSendListFileFromServiceEnd());
+        //sendBack(ctx,CreatCommand.getSendListFileFromServiceEnd());
     }
 
     @Override
@@ -120,6 +120,7 @@ public class FileHandler extends ChannelInboundHandlerAdapter {
 
     public void sendBackBytes(ChannelHandlerContext ctx, byte [] arr){
         ByteBuf buf = ctx.alloc().buffer(arr.length);
+
         buf.writeBytes(arr);
 
         ctx.writeAndFlush(buf);

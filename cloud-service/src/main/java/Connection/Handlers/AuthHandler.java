@@ -23,7 +23,7 @@ public class AuthHandler extends ChannelInboundHandlerAdapter {
         // Поскольку этот хендлер стоит "первым от сети", то 100% получим ByteBuf
         ByteBuf buf = (ByteBuf)msg;
         while (buf.readableBytes()>0){
-            System.out.println(state);
+            //System.out.println(state);
             if(state == State.IDLE){
                 byte readed = buf.readByte();
                 if(readed == CreatCommand.getCommandAuth()){

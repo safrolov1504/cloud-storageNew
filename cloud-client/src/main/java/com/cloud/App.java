@@ -23,9 +23,7 @@ public class App extends Application {
     public static MyClientServer getMessageService() {
         return messageService;
     }
-    public static void setMessageService(MyClientServer messageService) {
-        App.messageService = messageService;
-    }
+
 
     public static boolean isFlag() {
         return flag;

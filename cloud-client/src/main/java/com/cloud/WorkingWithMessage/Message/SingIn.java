@@ -25,7 +25,7 @@ public class SingIn {
         if(arrayByte == -126){
             userName = controller.textField_login.getText();
             App.setFlag(true);
-            System.out.println(userName + " is it ");
+            //System.out.println(userName + " is it ");
             ChangeStage.changeStageDo((Stage) controller.testField_pass.getScene().getWindow(),
                     "/com/cloud/workInterface.fxml","Working window "+ controller.textField_login.getText());
 //            controller.setClient(userName);

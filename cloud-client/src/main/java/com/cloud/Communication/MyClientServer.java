@@ -58,7 +58,7 @@ public class MyClientServer {
     }
 
     public void getListFile(ArrayList<Byte> bytes) {
-        bytes.remove(0);
+        //bytes.remove(0);
         bytes.remove(bytes.size()-1);
         byte [] bytes1 = new byte[bytes.size()];
         int i = 0;
