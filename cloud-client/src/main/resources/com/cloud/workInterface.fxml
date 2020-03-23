@@ -120,7 +120,7 @@
                         <Font size="24.0" />
                      </font>
                   </Label>
-                  <TableView prefHeight="397.0" prefWidth="286.0" GridPane.columnSpan="9" GridPane.rowIndex="2" GridPane.rowSpan="19">
+                  <TableView fx:id="table_service" prefHeight="397.0" prefWidth="286.0" GridPane.columnSpan="9" GridPane.rowIndex="2" GridPane.rowSpan="19">
                     <columns>
                       <TableColumn fx:id="table_serverName" prefWidth="145.0" text="Name of file" />
                       <TableColumn fx:id="table_serverSize" prefWidth="70.0" text="Size" />

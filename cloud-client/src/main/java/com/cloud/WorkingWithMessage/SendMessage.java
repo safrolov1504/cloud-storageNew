@@ -2,6 +2,7 @@ package com.cloud.WorkingWithMessage;
 
 
 import com.cloud.Communication.MyClientServer;
+import com.cloud.Communication.Network;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -10,19 +11,19 @@ import java.util.Arrays;
 
 
 public class SendMessage {
-    private MyClientServer messageService;
+    private Network network;
 
-    public SendMessage(MyClientServer messageService) {
-        this.messageService = messageService;
+    public SendMessage(Network network) {
+        this.network = network;
     }
 
     public void sendSighIn(String login, String pass) {
-        messageService.sendByte(CreatCommand.getCommandAuth());
+        network.sendByte(CreatCommand.getCommandAuth());
 
-        messageService.sendInt(login.length());
-        messageService.sendMessage(login.getBytes());
-        messageService.sendInt(pass.length());
-        messageService.sendMessage(pass.getBytes());
+        network.sendInt(login.length());
+        network.sendMessage(login.getBytes());
+        network.sendInt(pass.length());
+        network.sendMessage(pass.getBytes());
     }
 
 
@@ -32,31 +33,41 @@ public class SendMessage {
         byte[] byteArray;
         int i;
 
-        messageService.sendByte(CreatCommand.getSendFile());
-//        messageService.sendInt(file.getName().length());
-//        messageService.sendMessage(file.getName().getBytes());
-//
-//
-//        messageService.sendLong(lengthFile);
-//
-//        //начинаем работу с файлом
-//
-//        boolean flag=true;
+        network.sendByte(CreatCommand.getSendFile());
+        network.sendInt(file.getName().length());
+        network.sendMessage(file.getName().getBytes());
 
-//        while (flag){
-//                if(lengthFile<1024){
-//                    byteArray = new byte[(int) lengthFile];
-//                } else {
-//                    byteArray = new byte[1024];
-//                }
-//                i = fileInputStream.read(byteArray);
-//                lengthFile-=i;
-//                messageService.sendMessage(byteArray);
-//                System.out.println(i+" "+lengthFile);
-//                System.out.println(Arrays.toString(byteArray));
-//
-//        }
-//
-//        fileInputStream.close();
+
+        network.sendLong(lengthFile);
+
+        //начинаем работу с файлом
+        boolean flag=true;
+
+        while (flag){
+                if(lengthFile<1024){
+                    byteArray = new byte[(int) lengthFile];
+                    flag = false;
+                } else {
+                    byteArray = new byte[1024];
+                }
+                i = fileInputStream.read(byteArray);
+                lengthFile-=i;
+                network.sendMessage(byteArray);
+                //System.out.println(i+" "+lengthFile);
+                //System.out.println(Arrays.toString(byteArray));
+        }
+
+        fileInputStream.close();
+    }
+
+    public void sendRequestToGetListFileFromService() {
+        System.out.println("Send command to update list "+CreatCommand.getSendListFileFromService());
+        network.sendByte(CreatCommand.getSendListFileFromService());
+    }
+
+    public void getFileFromService(String nameFile) {
+        network.sendByte(CreatCommand.getGetFile());
+        network.sendInt(nameFile.length());
+        network.sendMessage(nameFile.getBytes());
     }
 }

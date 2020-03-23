@@ -2,10 +2,8 @@ package com.cloud;
 
 
 import com.cloud.Communication.MyClientServer;
-import com.cloud.Controllers.FileForTable;
+import com.cloud.Controllers.WorkWithTables;
 import com.cloud.WorkingWithMessage.SendMessage;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -30,39 +28,44 @@ public class Controller implements Initializable {
     public TableColumn<FileForTable,String> table_clientName;
     public TableColumn<FileForTable,String> table_clientSize;
     public TableColumn<FileForTable,String> table_clientDate;
-    public ObservableList<FileForTable> fileData = FXCollections.observableArrayList();
+//    public ObservableList<FileForTable> fileDataClient = FXCollections.observableArrayList();
+
 
     //server
-    public TableColumn table_serverName;
-    public TableColumn table_serverSize;
-    public TableColumn table_serverDate;
-
-
+    public TableView<FileForTable> table_service;
+    public TableColumn<FileForTable,String> table_serverName;
+    public TableColumn<FileForTable,String> table_serverSize;
+    public TableColumn<FileForTable,String> table_serverDate;
+//    public ObservableList<FileForTable> fileDataService = FXCollections.observableArrayList();
 
     private MyClientServer messageService;
     private SendMessage sendMessage;
-
-    private String client;
-
-    public void setClient(String client) {
-        this.client = client;
-    }
+    private WorkWithTables workWithTables;
 
     public void shutdown() {
         //System.exit(0);
     }
 
+    public WorkWithTables getWorkWithTables() {
+        return workWithTables;
+    }
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        table_client = new TableView<>();
-        table_clientName = new TableColumn<>();
-        table_clientSize = new TableColumn<>();
-        table_clientDate = new TableColumn<>();
         try{
-            this.messageService = new MyClientServer(this);
-            this.sendMessage = new SendMessage(this.messageService);
+            this.messageService = App.getMessageService();
+            this.sendMessage = new SendMessage(this.messageService.getNetwork());
+            App.getMessageService().getGetMessage().setController(this);
         } catch (Exception e) {
             e.printStackTrace();
+        }
+
+        if(App.isFlag()){
+            //creatTables();
+            workWithTables = new WorkWithTables(this,sendMessage);
+            workWithTables.updateTableClient();
+
+            workWithTables.updateTableService();
         }
     }
 
@@ -75,19 +78,36 @@ public class Controller implements Initializable {
     //button clients
     @FXML
     public void button_sendToService(ActionEvent actionEvent) {
-        File file = new File("cloud-client/storage/1.txt");
+        File file;
 
-        try {
-            sendMessage.sendFileToServer(file);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+        FileForTable selectedFile = table_client.getSelectionModel().getSelectedItem();
+        System.out.println(selectedFile);
+        if(selectedFile !=null){
+            file = new File("cloud-client/storage/"+selectedFile.nameFileTable);
+            try {
+                sendMessage.sendFileToServer(file);
+                workWithTables.updateTableService();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            selectedFile=null;
         }
     }
 
     @FXML
     public void button_delete(ActionEvent actionEvent) {
+        File file;
+
+        FileForTable selectedFile = table_client.getSelectionModel().getSelectedItem();
+        System.out.println(selectedFile);
+        if(selectedFile !=null) {
+            file = new File("cloud-client/storage/" + selectedFile.nameFileTable);
+            file.delete();
+            selectedFile = null;
+        }
+        workWithTables.updateTableClient();
     }
 
     @FXML
@@ -97,9 +117,17 @@ public class Controller implements Initializable {
     //button server
     @FXML
     public void button_sendToClient(ActionEvent actionEvent) {
+        FileForTable selectedFile = table_service.getSelectionModel().getSelectedItem();
+        System.out.println(selectedFile);
+        if(selectedFile !=null) {
+
+            sendMessage.getFileFromService(selectedFile.nameFileTable);
+            selectedFile = null;
+        }
     }
 
     @FXML
     public void button_exit(ActionEvent actionEvent) {
+        System.exit(0);
     }
 }

@@ -1,5 +1,7 @@
 package com.cloud.Communication;
 
+import com.cloud.Controller;
+import com.cloud.WorkingWithMessage.CreatCommand;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 
@@ -7,6 +9,9 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class Network {
@@ -17,10 +22,13 @@ public class Network {
     private DataInputStream inputStream;
     private DataOutputStream outputStream;
     private Scanner scannerIn;
-
+    private Controller controller;
 
     public DataOutputStream getOutputStream() {
         return outputStream;
+    }
+    public DataInputStream getInputStream() {
+        return inputStream;
     }
 
     public Network(String serverAddress, int port, MyClientServer myClientServer) {
@@ -59,14 +67,61 @@ public class Network {
                 //waiting for message
                 try {
                     byte inByte = inputStream.readByte();
-                    System.out.println(inByte);
-                    Platform.runLater(() -> myClientServer.processRetrievedMessage(inByte));
+                    if(inByte == CreatCommand.getSendListFileFromService() || inByte == CreatCommand.getGetFileOk()
+                            || inByte == CreatCommand.getGetFileNOk()){
+                        byte command = inByte;
+                        if(inByte == CreatCommand.getGetFileNOk()){
+                            //error
+                        } else {
+                            getSthFromService(command);
+                        }
+                    } else {
+                        System.out.println(inByte);
+                        byte finalInByte = inByte;
+                        Platform.runLater(() -> myClientServer.processRetrievedMessage(finalInByte));
+                    }
                 } catch (IOException e){
                     System.exit(0);
                 }
             }
         }).start();
     }
+
+    public void getSthFromService(byte command) throws IOException {
+        byte inByte;
+        System.out.println("Get sth from service");
+        ArrayList<Byte> bytes = new ArrayList<>();
+        int time=0;
+
+        //waiting for size of string (name or list from service)
+        int length = inputStream.readInt();
+//        byte [] byteLength = new byte[4];
+//        while (time !=4){
+//            inByte = inputStream.readByte();
+//            byteLength[time] = inByte;
+//            time++;
+//        }
+        time = length;
+//        time = ByteBuffer.wrap(byteLength).getInt();
+        //bytes.remove(0);
+        System.out.println(Arrays.toString(bytes.toArray())+" "+time);
+
+        while (time > 0){
+            inByte = inputStream.readByte();
+            bytes.add(inByte);
+            //System.out.println("here "+ inByte);
+            time--;
+        }
+
+        if(command == CreatCommand.getSendListFileFromService()){
+            //case when we're waiting for list of Files on the service
+            myClientServer.getListFile(bytes);
+        } else if(command == CreatCommand.getGetFileOk()){
+            //case when we're waiting for file from service
+            myClientServer.getFileFromService(bytes,inputStream);
+        }
+    }
+
 
     public void sendInt(int intIn) {
         try {
@@ -75,7 +130,6 @@ public class Network {
             e.printStackTrace();
         }
     }
-
     public void sendLong(long longIn){
         try {
             outputStream.writeLong(longIn);
@@ -83,7 +137,6 @@ public class Network {
             e.printStackTrace();
         }
     }
-
     public void sendByte(byte byteIn){
         try {
             outputStream.writeByte(byteIn);
@@ -91,7 +144,6 @@ public class Network {
             e.printStackTrace();
         }
     }
-
     public void sendMessage(byte[] outByte) {
         try {
             outputStream.write(outByte);

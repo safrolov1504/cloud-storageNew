@@ -1,6 +1,8 @@
 package com.cloud;
 
+import com.cloud.Communication.MyClientServer;
 import com.cloud.Controllers.ChangeStage;
+import com.cloud.WorkingWithMessage.GetMessage;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -15,23 +17,28 @@ import java.io.IOException;
 public class App extends Application {
 
     private static Scene scene;
+    private static MyClientServer messageService;
+    private static boolean flag;
+
+    public static MyClientServer getMessageService() {
+        return messageService;
+    }
+
+
+    public static boolean isFlag() {
+        return flag;
+    }
+    public static void setFlag(boolean flag) {
+        App.flag = flag;
+    }
 
     @Override
     public void start(Stage stage) throws IOException {
-        //scene = new Scene(loadFXML("primary"));
-        //stage.setScene(scene);
-        //stage.show();
+        flag = false;
+        messageService = new MyClientServer();
         ChangeStage.changeStageDo(stage, "/com/cloud/loginInterface.fxml","Welcome PC");
     }
 
-//    static void setRoot(String fxml) throws IOException {
-//        scene.setRoot(loadFXML(fxml));
-//    }
-//
-//    private static Parent loadFXML(String fxml) throws IOException {
-//        FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource(fxml + ".fxml"));
-//        return fxmlLoader.load();
-//    }
 
     public static void main(String[] args) {
         launch();
