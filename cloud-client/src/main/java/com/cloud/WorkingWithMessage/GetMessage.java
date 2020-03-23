@@ -9,6 +9,10 @@ import com.cloud.WorkingWithMessage.Message.WorkFile;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Arrays;
 
 public class GetMessage {
@@ -41,9 +45,38 @@ public class GetMessage {
         if(innerByte == CreatCommand.getCommandAuthNok() || innerByte == CreatCommand.getCommandAuthOk()){
             (new SingIn(controller,innerByte)).checkUser();
         }
+
         if(innerByte == CreatCommand.getSendFileOk() || innerByte == CreatCommand.getSendFileOk()){
             (new WorkFile(controller,innerByte)).addSucceed();
         }
+    }
+
+    public void getFileFromService(byte[] nameFileByte, DataInputStream inputStream) throws IOException {
+        System.out.println("Get file from service");
+
+        //get name of file
+        String nameFile = new String(nameFileByte);
+
+        //get length of file
+        long lengthFile = inputStream.readLong();
+
+        System.out.println(nameFile+" "+lengthFile);
+
+        File file = new File("/Users/safrolov/Documents/JavaProgramming/01_readyProjects/cloud-storageNew/cloud-client/storage/"+nameFile);
+
+        if(file.exists()){
+
+        } else {
+            //creat file
+            file.createNewFile();
+            FileOutputStream fileOutputStream = new FileOutputStream(file);
+            while (lengthFile>0){
+                fileOutputStream.write(inputStream.readByte());
+                lengthFile--;
+            }
+            controller.getWorkWithTables().updateTableClient();
         }
 
+
+    }
 }

@@ -64,4 +64,10 @@ public class SendMessage {
         System.out.println("Send command to update list "+CreatCommand.getSendListFileFromService());
         network.sendByte(CreatCommand.getSendListFileFromService());
     }
+
+    public void getFileFromService(String nameFile) {
+        network.sendByte(CreatCommand.getGetFile());
+        network.sendInt(nameFile.length());
+        network.sendMessage(nameFile.getBytes());
+    }
 }

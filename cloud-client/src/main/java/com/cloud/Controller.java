@@ -117,6 +117,13 @@ public class Controller implements Initializable {
     //button server
     @FXML
     public void button_sendToClient(ActionEvent actionEvent) {
+        FileForTable selectedFile = table_service.getSelectionModel().getSelectedItem();
+        System.out.println(selectedFile);
+        if(selectedFile !=null) {
+
+            sendMessage.getFileFromService(selectedFile.nameFileTable);
+            selectedFile = null;
+        }
     }
 
     @FXML

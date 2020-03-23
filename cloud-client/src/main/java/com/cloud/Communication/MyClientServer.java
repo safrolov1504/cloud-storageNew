@@ -3,6 +3,7 @@ package com.cloud.Communication;
 import com.cloud.WorkingWithMessage.CreatCommand;
 import com.cloud.WorkingWithMessage.GetMessage;
 
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -59,13 +60,30 @@ public class MyClientServer {
 
     public void getListFile(ArrayList<Byte> bytes) {
         //bytes.remove(0);
-        bytes.remove(bytes.size()-1);
+        //bytes.remove(bytes.size()-1); - проверить зачем эта строчка (была в получение листа)
+//        byte [] bytes1 = new byte[bytes.size()];
+//        int i = 0;
+//        for (byte b:bytes) {
+//            bytes1[i] = b;
+//            i++;
+//        }
+        //getMessage.getListFile(bytes1);
+        getMessage.getListFile(byteToByte(bytes));
+    }
+
+    public void getFileFromService(ArrayList<Byte> bytes, DataInputStream inputStream) throws IOException {
+        getMessage.getFileFromService(byteToByte(bytes),inputStream);
+    }
+
+    private byte [] byteToByte(ArrayList<Byte> bytes){
+        //bytes.remove(0);
+        //bytes.remove(bytes.size()-1); - проверить зачем эта строчка (была в получение листа)
         byte [] bytes1 = new byte[bytes.size()];
         int i = 0;
         for (byte b:bytes) {
             bytes1[i] = b;
             i++;
         }
-        getMessage.getListFile(bytes1);
+        return bytes1;
     }
 }

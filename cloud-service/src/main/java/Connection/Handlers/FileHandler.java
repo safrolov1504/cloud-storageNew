@@ -1,7 +1,6 @@
 package Connection.Handlers;
 
 import Connection.CreatCommand;
-import Connection.FileForTable;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -9,16 +8,21 @@ import workingWithMessage.ListFilesServer;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.attribute.BasicFileAttributes;
+
 
 // Идет после FirstHandler в конвеере
 public class FileHandler extends ChannelInboundHandlerAdapter {
     public enum State {
-        IDLE,NAME_LENGTH, NAME, FILE_LENGTH, FILE, GET
+        IDLE, NAME_LENGTH, NAME, FILE_LENGTH, FILE, GET
     }
+
+    public enum StateSecond{
+        IDLE, NEXT_HANDLER
+    }
+
     private State state = State.IDLE;
+    private StateSecond stateSecond = StateSecond.IDLE;
+
     private int fileNameLength;
     private String fileName;
     private long fileLength;
@@ -35,7 +39,7 @@ public class FileHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         ByteBuf buf = (ByteBuf)msg;
-
+        String [] strings = new String[3];
         while (buf.readableBytes()>0){
             if(state == State.IDLE){
                 byte read = buf.readByte();
@@ -45,15 +49,16 @@ public class FileHandler extends ChannelInboundHandlerAdapter {
                     //System.out.println("get command to send list "+ CreatCommand.getSendListFileFromService());
                     sendList(ctx);
                     //break;
+                } else if(read == CreatCommand.getGetFile()){
+                    state = State.NAME_LENGTH;
+                    stateSecond = StateSecond.NEXT_HANDLER;
+                    strings[0] = "SEND_FILE_TO_CLIENT";
                 } else {
                     System.out.println("ERROR: Invalid first byte - " + read);
                     //сделать переход в статус перекидования в следующий handler
                     //state = State.NEXT_HANDLER;
                 }
             }
-//            if(state == State.NEXT_HANDLER){
-//                //сделать переход в статус перекидования в следующий handler
-//            }
 
             if(state == State.NAME_LENGTH){
                 if(buf.readableBytes() >= 4){
@@ -70,6 +75,15 @@ public class FileHandler extends ChannelInboundHandlerAdapter {
                     state = State.FILE_LENGTH;
                 }
             }
+
+            if(stateSecond == StateSecond.NEXT_HANDLER){
+                strings[1] = fileName;
+                strings[2] = userName;
+                ctx.fireChannelRead(strings);
+                state = State.IDLE;
+                stateSecond = StateSecond.IDLE;
+            }
+
             if(state == State.FILE_LENGTH){
                 if(buf.readableBytes()>= 8){
                     fileLength = buf.readLong();

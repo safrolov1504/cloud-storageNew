@@ -74,7 +74,7 @@ public class AuthHandler extends ChannelInboundHandlerAdapter {
                     //в случае удачной авторизации удаляем этом handler и создаем, который обрабатыват команды
                     buf.writeByte(CreatCommand.getCommandAuthOk());
 
-                    ctx.pipeline().addLast(new FileHandler(userName));//, new EditFileHandler());
+                    ctx.pipeline().addLast(new FileHandler(userName),new EditFileHandler());//, new EditFileHandler());
                     ctx.pipeline().remove(this);
 
                     ctx.writeAndFlush(buf);

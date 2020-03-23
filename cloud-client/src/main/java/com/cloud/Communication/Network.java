@@ -67,31 +67,14 @@ public class Network {
                 //waiting for message
                 try {
                     byte inByte = inputStream.readByte();
-                    if(inByte == CreatCommand.getSendListFileFromService()){
-                        //get list of files on service
-                        System.out.println("Start updating list");
-                        ArrayList<Byte> bytes = new ArrayList<>();
-                        int time=0;
-
-                        //waiting for size of string
-                        byte [] byteLength = new byte[4];
-                        while (time !=4){
-                            inByte = inputStream.readByte();
-                            byteLength[time] = inByte;
-                            time++;
+                    if(inByte == CreatCommand.getSendListFileFromService() || inByte == CreatCommand.getGetFileOk()
+                            || inByte == CreatCommand.getGetFileNOk()){
+                        byte command = inByte;
+                        if(inByte == CreatCommand.getGetFileNOk()){
+                            //error
+                        } else {
+                            getSthFromService(command);
                         }
-
-                        time = ByteBuffer.wrap(byteLength).getInt();
-                        //bytes.remove(0);
-                        System.out.println(Arrays.toString(bytes.toArray())+" "+time);
-
-                        while (time > 0){
-                            inByte = inputStream.readByte();
-                            bytes.add(inByte);
-                            //System.out.println("here "+ inByte);
-                            time--;
-                        }
-                        myClientServer.getListFile(bytes);
                     } else {
                         System.out.println(inByte);
                         byte finalInByte = inByte;
@@ -103,6 +86,42 @@ public class Network {
             }
         }).start();
     }
+
+    public void getSthFromService(byte command) throws IOException {
+        byte inByte;
+        System.out.println("Get sth from service");
+        ArrayList<Byte> bytes = new ArrayList<>();
+        int time=0;
+
+        //waiting for size of string (name or list from service)
+        int length = inputStream.readInt();
+//        byte [] byteLength = new byte[4];
+//        while (time !=4){
+//            inByte = inputStream.readByte();
+//            byteLength[time] = inByte;
+//            time++;
+//        }
+        time = length;
+//        time = ByteBuffer.wrap(byteLength).getInt();
+        //bytes.remove(0);
+        System.out.println(Arrays.toString(bytes.toArray())+" "+time);
+
+        while (time > 0){
+            inByte = inputStream.readByte();
+            bytes.add(inByte);
+            //System.out.println("here "+ inByte);
+            time--;
+        }
+
+        if(command == CreatCommand.getSendListFileFromService()){
+            //case when we're waiting for list of Files on the service
+            myClientServer.getListFile(bytes);
+        } else if(command == CreatCommand.getGetFileOk()){
+            //case when we're waiting for file from service
+            myClientServer.getFileFromService(bytes,inputStream);
+        }
+    }
+
 
     public void sendInt(int intIn) {
         try {
